@@ -3,7 +3,7 @@ var elevatorSvc;
 var directionsSvc;
 var directionsRdr;
 
-var firstPoint;
+var points;
 
 function initialize() {
 	var home = new google.maps.LatLng(51.0747504771771, -1.3252487182617188);
@@ -21,7 +21,7 @@ function initialize() {
 	directionsRdr = new google.maps.DirectionsRenderer();
 	directionsRdr.setMap(map);
 	google.maps.event.addListener(map, 'click', clickHandler);
-	firstPoint = null;
+	points = [];
 }
 
 
@@ -34,20 +34,24 @@ function log(msg) {
 function clickHandler(event) {
 	
 	var latLng = event.latLng;
-	var locations = [];
-	locations.push(latLng);
-	var positionalRequest = {
-		'locations' : locations
-	};
-	
-	if (firstPoint == null) {
-		firstPoint = latLng;
-	} else {
-		log("Calculating Route between: " + firstPoint + " and " + latLng + "\n");
+	points.push(latLng);
+	if(points.length > 1) {
+		var start = points[0];
+		var end = points[points.length-1];
+		var waypts = [];
+		for(var idx = 1; idx < points.length-2; ++idx){
+			waypts.push({
+				location:points[idx],
+				stopover:false
+			});
+		}
+		
+		log("Calculating Route between: " + start + " and " + end + "\n");
 		
 		var request = {
-			origin:firstPoint,
-			destination:latLng,
+			origin:start,
+			destination:end,
+			waypoints:waypts,
 			//travelMode:google.maps.TravelMode.BICYCLING,
 			travelMode:google.maps.TravelMode.DRIVING,
 			unitSystem:google.maps.UnitSystem.METRIC,
@@ -57,16 +61,21 @@ function clickHandler(event) {
 		directionsSvc.route(request, function(result, status){
 			if(status == google.maps.DirectionsStatus.OK){
 				directionsRdr.setDirections(result);
+				document.getElementById("distance").innerText = result.routes[0].legs[0].distance.text;
 			} else {
 				log("Failed to get route. Status: " + status + "\n");
 			}
 		});
-		firstPoint = null;
 	}
-	
-	
+
 	log("Position: " + latLng + " Elevation: ");
 	
+	
+	var locations = [];
+	locations.push(latLng);
+	var positionalRequest = {
+		'locations' : locations
+	};
 	// Initiate the location request
 	elevatorSvc.getElevationForLocations(positionalRequest, function(results, status) {
 		if (status == google.maps.ElevationStatus.OK) {

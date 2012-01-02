@@ -15,8 +15,13 @@
 </head>
 <body onload="initialize()">
   <div id="map_canvas" style="width:100%; height:85%"></div>
-  <div style="border:1px; margin:5px; padding:3px; height:10%">
-    <textarea id="log" readonly="readonly" style="width:100%;height:100%"></textarea>
+  <div style="position:absolute; top:90%; left:2em">
+    <button id="reset" onclick="resetRoute" style="align:middle">Reset</button>
   </div>
+  <div style="position:absolute; top:96%">
+      <label style="align:center; font-weight: bold" >Distance:</label>
+      <label style="align:center" id="distance">no distance</label>
+  </div>
+  <textarea id="log" readonly="readonly" style="margin-left: 12em; height:12%; pad:5px" cols="100" ></textarea>
 </body>
 </html>
